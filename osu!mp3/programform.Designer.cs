@@ -206,7 +206,7 @@ namespace osu_mp3
             this.createdby.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.createdby.Size = new System.Drawing.Size(156, 10);
             this.createdby.TabIndex = 2;
-            this.createdby.Text = "osu!MP3 1.2.28.1 (2021) created by Verchiel_";
+            this.createdby.Text = "osu!MP3 1.3.33.2 (2021) created by Verchiel_";
             this.createdby.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // status
