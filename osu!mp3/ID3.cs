@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,6 +29,26 @@ namespace mp3ID3parser
             {
                 dest.Tag.Track = 1;
             }
+            dest.Save();
+        }
+        public static void setCover(string FILENAME, string COVERPATH)
+        {
+            if (string.IsNullOrEmpty(COVERPATH))
+            {
+                return;
+            }
+            string filename = FILENAME;
+            var dest = TagLib.File.Create(@filename);
+            MemoryStream ms = new MemoryStream();
+            Image image = Image.FromFile(COVERPATH);
+            image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+            ms.Position = 0;
+            TagLib.Picture pic = new TagLib.Picture();
+            pic.Data = TagLib.ByteVector.FromStream(ms);
+            pic.Type = TagLib.PictureType.FrontCover;
+
+            dest.Tag.Pictures = new TagLib.IPicture[] { pic };
+
             dest.Save();
         }
     }

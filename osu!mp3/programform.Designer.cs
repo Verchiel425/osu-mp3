@@ -1,9 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using System;
-using System.Diagnostics;
-using System.Threading;
-
-namespace osu_mp3
+﻿namespace osu_mp3
 {
     partial class mainform
     {
@@ -37,6 +32,11 @@ namespace osu_mp3
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(mainform));
             this.extractButton = new System.Windows.Forms.Button();
             this.maingroup = new System.Windows.Forms.GroupBox();
+            this.startbutton = new osu_mp3.mainform.MenuButton();
+            this.startmenustrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.extractandtagToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.extractOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tagOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.songnumber = new System.Windows.Forms.Label();
             this.clear = new System.Windows.Forms.Label();
             this.songovrBrowseDir = new System.Windows.Forms.Button();
@@ -57,13 +57,15 @@ namespace osu_mp3
             this.extraction = new System.ComponentModel.BackgroundWorker();
             this.tooltip = new System.Windows.Forms.ToolTip(this.components);
             this.tagger = new System.ComponentModel.BackgroundWorker();
+            this.extractonly = new System.ComponentModel.BackgroundWorker();
+            this.tagonly = new System.ComponentModel.BackgroundWorker();
             this.maingroup.SuspendLayout();
+            this.startmenustrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // extractButton
             // 
             this.extractButton.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.extractButton.AutoSize = true;
             this.extractButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.extractButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(57)))), ((int)(((byte)(69)))));
             this.extractButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
@@ -71,11 +73,12 @@ namespace osu_mp3
             this.extractButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.extractButton.Font = new System.Drawing.Font("Century Gothic", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.extractButton.ForeColor = System.Drawing.Color.WhiteSmoke;
-            this.extractButton.Location = new System.Drawing.Point(119, 204);
+            this.extractButton.Location = new System.Drawing.Point(109, 204);
             this.extractButton.Name = "extractButton";
             this.extractButton.Size = new System.Drawing.Size(81, 27);
             this.extractButton.TabIndex = 0;
-            this.extractButton.Text = "Extract MP3";
+            this.extractButton.TabStop = false;
+            this.extractButton.Text = "Extract/Tag";
             this.extractButton.UseVisualStyleBackColor = false;
             this.extractButton.Click += new System.EventHandler(this.extractbutton);
             this.extractButton.MouseEnter += new System.EventHandler(this.extractButton_MouseEnter);
@@ -87,6 +90,8 @@ namespace osu_mp3
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.maingroup.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(60)))), ((int)(((byte)(66)))), ((int)(((byte)(77)))));
+            this.maingroup.Controls.Add(this.extractButton);
+            this.maingroup.Controls.Add(this.startbutton);
             this.maingroup.Controls.Add(this.songnumber);
             this.maingroup.Controls.Add(this.clear);
             this.maingroup.Controls.Add(this.songovrBrowseDir);
@@ -97,7 +102,6 @@ namespace osu_mp3
             this.maingroup.Controls.Add(this.status);
             this.maingroup.Controls.Add(this.openFolder);
             this.maingroup.Controls.Add(this.processI);
-            this.maingroup.Controls.Add(this.extractButton);
             this.maingroup.Controls.Add(this.progressBar1);
             this.maingroup.Controls.Add(this.dstLabel);
             this.maingroup.Controls.Add(this.srcLabel);
@@ -116,6 +120,60 @@ namespace osu_mp3
             this.maingroup.Text = "osu!MP3";
             this.maingroup.UseCompatibleTextRendering = true;
             // 
+            // startbutton
+            // 
+            this.startbutton.FlatAppearance.BorderColor = System.Drawing.Color.Black;
+            this.startbutton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.startbutton.Location = new System.Drawing.Point(189, 204);
+            this.startbutton.Menu = this.startmenustrip;
+            this.startbutton.Name = "startbutton";
+            this.startbutton.ShowMenuUnderCursor = true;
+            this.startbutton.Size = new System.Drawing.Size(21, 27);
+            this.startbutton.TabIndex = 16;
+            this.startbutton.TabStop = false;
+            this.startbutton.UseVisualStyleBackColor = true;
+            // 
+            // startmenustrip
+            // 
+            this.startmenustrip.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(56)))), ((int)(((byte)(67)))));
+            this.startmenustrip.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.startmenustrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.extractandtagToolStripMenuItem,
+            this.extractOnlyToolStripMenuItem,
+            this.tagOnlyToolStripMenuItem});
+            this.startmenustrip.Name = "startmenustrip";
+            this.startmenustrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
+            this.startmenustrip.Size = new System.Drawing.Size(165, 70);
+            // 
+            // extractandtagToolStripMenuItem
+            // 
+            this.extractandtagToolStripMenuItem.Checked = true;
+            this.extractandtagToolStripMenuItem.CheckOnClick = true;
+            this.extractandtagToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.extractandtagToolStripMenuItem.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.extractandtagToolStripMenuItem.Name = "extractandtagToolStripMenuItem";
+            this.extractandtagToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.extractandtagToolStripMenuItem.Text = "Extract and Tag";
+            this.extractandtagToolStripMenuItem.Click += new System.EventHandler(this.extractandtagToolStripMenuItem_Click);
+            // 
+            // extractOnlyToolStripMenuItem
+            // 
+            this.extractOnlyToolStripMenuItem.CheckOnClick = true;
+            this.extractOnlyToolStripMenuItem.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.extractOnlyToolStripMenuItem.Name = "extractOnlyToolStripMenuItem";
+            this.extractOnlyToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.extractOnlyToolStripMenuItem.Text = "Extract Only";
+            this.extractOnlyToolStripMenuItem.Click += new System.EventHandler(this.extractOnlyToolStripMenuItem_Click);
+            // 
+            // tagOnlyToolStripMenuItem
+            // 
+            this.tagOnlyToolStripMenuItem.CheckOnClick = true;
+            this.tagOnlyToolStripMenuItem.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.tagOnlyToolStripMenuItem.Name = "tagOnlyToolStripMenuItem";
+            this.tagOnlyToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.tagOnlyToolStripMenuItem.Text = "Tag Only";
+            this.tagOnlyToolStripMenuItem.Click += new System.EventHandler(this.tagOnlyToolStripMenuItem_Click);
+            // 
             // songnumber
             // 
             this.songnumber.AutoSize = true;
@@ -131,7 +189,7 @@ namespace osu_mp3
             this.clear.BackColor = System.Drawing.Color.Transparent;
             this.clear.Font = new System.Drawing.Font("Century Gothic", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.clear.ForeColor = System.Drawing.Color.WhiteSmoke;
-            this.clear.Location = new System.Drawing.Point(206, 210);
+            this.clear.Location = new System.Drawing.Point(216, 210);
             this.clear.Name = "clear";
             this.clear.Size = new System.Drawing.Size(36, 15);
             this.clear.TabIndex = 14;
@@ -154,6 +212,7 @@ namespace osu_mp3
             this.songovrBrowseDir.Name = "songovrBrowseDir";
             this.songovrBrowseDir.Size = new System.Drawing.Size(73, 23);
             this.songovrBrowseDir.TabIndex = 13;
+            this.songovrBrowseDir.TabStop = false;
             this.songovrBrowseDir.Text = "Browse...";
             this.songovrBrowseDir.UseVisualStyleBackColor = false;
             this.songovrBrowseDir.Click += new System.EventHandler(this.songovrBrowseDir_Click);
@@ -206,7 +265,7 @@ namespace osu_mp3
             this.createdby.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.createdby.Size = new System.Drawing.Size(156, 10);
             this.createdby.TabIndex = 2;
-            this.createdby.Text = "osu!MP3 1.3.33.2 (2021) created by Verchiel_";
+            this.createdby.Text = "osu!MP3 1.4.34.1 (2021) created by Verchiel_";
             this.createdby.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // status
@@ -227,7 +286,7 @@ namespace osu_mp3
             this.openFolder.BackColor = System.Drawing.Color.Transparent;
             this.openFolder.Font = new System.Drawing.Font("Century Gothic", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.openFolder.ForeColor = System.Drawing.Color.WhiteSmoke;
-            this.openFolder.Location = new System.Drawing.Point(67, 210);
+            this.openFolder.Location = new System.Drawing.Point(57, 210);
             this.openFolder.Name = "openFolder";
             this.openFolder.Size = new System.Drawing.Size(46, 15);
             this.openFolder.TabIndex = 8;
@@ -249,7 +308,7 @@ namespace osu_mp3
             this.processI.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.processI.Size = new System.Drawing.Size(304, 17);
             this.processI.TabIndex = 7;
-            this.processI.Text = "Click \"Extract MP3\" to extract";
+            this.processI.Text = "Click Extract/Tag to start";
             this.processI.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // progressBar1
@@ -300,6 +359,7 @@ namespace osu_mp3
             this.browseDstDir.Name = "browseDstDir";
             this.browseDstDir.Size = new System.Drawing.Size(73, 23);
             this.browseDstDir.TabIndex = 3;
+            this.browseDstDir.TabStop = false;
             this.browseDstDir.Text = "Browse...";
             this.browseDstDir.UseVisualStyleBackColor = false;
             this.browseDstDir.Click += new System.EventHandler(this.browseDstDir_Click);
@@ -335,6 +395,7 @@ namespace osu_mp3
             this.browseSrcDir.Name = "browseSrcDir";
             this.browseSrcDir.Size = new System.Drawing.Size(73, 23);
             this.browseSrcDir.TabIndex = 0;
+            this.browseSrcDir.TabStop = false;
             this.browseSrcDir.Text = "Browse...";
             this.browseSrcDir.UseVisualStyleBackColor = false;
             this.browseSrcDir.Click += new System.EventHandler(this.browseSrcDir_Click);
@@ -366,7 +427,7 @@ namespace osu_mp3
             this.ClientSize = new System.Drawing.Size(342, 271);
             this.Controls.Add(this.maingroup);
             this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "mainform";
@@ -376,6 +437,7 @@ namespace osu_mp3
             this.Load += new System.EventHandler(this.mainform_Load);
             this.maingroup.ResumeLayout(false);
             this.maingroup.PerformLayout();
+            this.startmenustrip.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -404,6 +466,13 @@ namespace osu_mp3
         private System.Windows.Forms.Label clear;
         private System.Windows.Forms.Label songnumber;
         private System.ComponentModel.BackgroundWorker tagger;
+        private MenuButton startbutton;
+        private System.Windows.Forms.ContextMenuStrip startmenustrip;
+        private System.Windows.Forms.ToolStripMenuItem extractandtagToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem extractOnlyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem tagOnlyToolStripMenuItem;
+        private System.ComponentModel.BackgroundWorker extractonly;
+        private System.ComponentModel.BackgroundWorker tagonly;
     }
 }
 

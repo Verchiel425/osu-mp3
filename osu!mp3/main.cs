@@ -6,7 +6,6 @@ using System.Windows.Forms;
 using System.IO;
 using ezf;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace osu_mp3
 {
@@ -95,6 +94,32 @@ namespace osu_mp3
             }
             return 0;
         }
+        public static string getPic(string songdir, string songname)
+        {
+            FOLDER folder = new FOLDER(songdir);
+            FOLDER songfolder = new FOLDER();
+            string coverpath = "";
+
+            for (int index = 0; index < folder.totalfolders(); index++)
+            {
+                if ((folder.getfolders()[index]).Contains(songname))
+                {
+                    songfolder.setPath(folder.getfolders()[index]);
+                }
+            }
+            for (int i = 0; i < songfolder.totalfiles(); i++)
+            {
+                if ((songfolder.getfiles()[i]).Contains(".jpeg") || (songfolder.getfiles()[i]).Contains(".jpg") || (songfolder.getfiles()[i]).Contains(".png"))
+                {
+                    coverpath = songfolder.getfiles()[i];
+                }
+            }
+            if (songfolder.totalfiles() == 0)
+            {
+                return "";
+            }
+            return coverpath;
+        }
         public static string currentlyextracting()
         {
             return currently_extracting;
@@ -123,10 +148,11 @@ namespace osu_mp3
         public string songdir { get; set; }
         public string destdir { get; set; }
         public string overridestate { get; set; }
+        public string operation { get; set; }
     };
     class config
     {
-        public static void save(string OSUDIR, string SONGDIR, string DESTDIR, bool OVERRIDE_STATE)
+        public static void save(string OSUDIR, string SONGDIR, string DESTDIR, bool OVERRIDE_STATE, int OPERATION)
         {
             CONFIG defconfig = new CONFIG
             {
@@ -134,6 +160,7 @@ namespace osu_mp3
                 songdir = SONGDIR,
                 destdir = DESTDIR,
                 overridestate = OVERRIDE_STATE.ToString(),
+                operation = OPERATION.ToString()
             };
 
             string configname = "config.json";
@@ -216,6 +243,28 @@ namespace osu_mp3
                     string jsonString = File.ReadAllText("config.json");
                     CONFIG defconfig = JsonSerializer.Deserialize<CONFIG>(jsonString);
                     return defconfig.overridestate;
+                }
+                catch (System.Text.Json.JsonException)
+                {
+                    MessageBox.Show("config.json is corrupted!", "Config Corrupted", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    File.Delete("config.json");
+                    return "";
+                }
+            }
+            else
+            {
+                return "";
+            }
+        }
+        public static string operation()
+        {
+            if (File.Exists("config.json"))
+            {
+                try
+                {
+                    string jsonString = File.ReadAllText("config.json");
+                    CONFIG defconfig = JsonSerializer.Deserialize<CONFIG>(jsonString);
+                    return defconfig.operation;
                 }
                 catch (System.Text.Json.JsonException)
                 {
