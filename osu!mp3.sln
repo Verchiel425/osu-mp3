@@ -4,11 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "osu!mp3", "osu!mp3\osu!mp3.csproj", "{32F3E36F-BC57-4EDE-8C70-63EA9E574B3F}"
-	ProjectSection(ProjectDependencies) = postProject
-		{EBF4D3CF-342B-47E1-8ECA-52B1BC4F702D} = {EBF4D3CF-342B-47E1-8ECA-52B1BC4F702D}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "osu!mp3Lib", "..\osump3extractor\osump3extractor\osump3extractor.vcxproj", "{EBF4D3CF-342B-47E1-8ECA-52B1BC4F702D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,18 +27,6 @@ Global
 		{32F3E36F-BC57-4EDE-8C70-63EA9E574B3F}.Release|x64.Build.0 = Release|Any CPU
 		{32F3E36F-BC57-4EDE-8C70-63EA9E574B3F}.Release|x86.ActiveCfg = Release|Any CPU
 		{32F3E36F-BC57-4EDE-8C70-63EA9E574B3F}.Release|x86.Build.0 = Release|Any CPU
-		{EBF4D3CF-342B-47E1-8ECA-52B1BC4F702D}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{EBF4D3CF-342B-47E1-8ECA-52B1BC4F702D}.Debug|Any CPU.Build.0 = Debug|x64
-		{EBF4D3CF-342B-47E1-8ECA-52B1BC4F702D}.Debug|x64.ActiveCfg = Debug|x64
-		{EBF4D3CF-342B-47E1-8ECA-52B1BC4F702D}.Debug|x64.Build.0 = Debug|x64
-		{EBF4D3CF-342B-47E1-8ECA-52B1BC4F702D}.Debug|x86.ActiveCfg = Debug|Win32
-		{EBF4D3CF-342B-47E1-8ECA-52B1BC4F702D}.Debug|x86.Build.0 = Debug|Win32
-		{EBF4D3CF-342B-47E1-8ECA-52B1BC4F702D}.Release|Any CPU.ActiveCfg = Release|x64
-		{EBF4D3CF-342B-47E1-8ECA-52B1BC4F702D}.Release|Any CPU.Build.0 = Release|x64
-		{EBF4D3CF-342B-47E1-8ECA-52B1BC4F702D}.Release|x64.ActiveCfg = Release|x64
-		{EBF4D3CF-342B-47E1-8ECA-52B1BC4F702D}.Release|x64.Build.0 = Release|x64
-		{EBF4D3CF-342B-47E1-8ECA-52B1BC4F702D}.Release|x86.ActiveCfg = Release|Win32
-		{EBF4D3CF-342B-47E1-8ECA-52B1BC4F702D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

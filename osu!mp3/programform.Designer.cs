@@ -37,6 +37,8 @@ namespace osu_mp3
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(mainform));
             this.extractButton = new System.Windows.Forms.Button();
             this.maingroup = new System.Windows.Forms.GroupBox();
+            this.songnumber = new System.Windows.Forms.Label();
+            this.clear = new System.Windows.Forms.Label();
             this.songovrBrowseDir = new System.Windows.Forms.Button();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.songovrLabel = new System.Windows.Forms.Label();
@@ -53,7 +55,8 @@ namespace osu_mp3
             this.srcTextBox = new System.Windows.Forms.TextBox();
             this.browseSrcDir = new System.Windows.Forms.Button();
             this.extraction = new System.ComponentModel.BackgroundWorker();
-            this.songovrTT = new System.Windows.Forms.ToolTip(this.components);
+            this.tooltip = new System.Windows.Forms.ToolTip(this.components);
+            this.tagger = new System.ComponentModel.BackgroundWorker();
             this.maingroup.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -80,7 +83,12 @@ namespace osu_mp3
             // 
             // maingroup
             // 
+            this.maingroup.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.maingroup.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(60)))), ((int)(((byte)(66)))), ((int)(((byte)(77)))));
+            this.maingroup.Controls.Add(this.songnumber);
+            this.maingroup.Controls.Add(this.clear);
             this.maingroup.Controls.Add(this.songovrBrowseDir);
             this.maingroup.Controls.Add(this.checkBox1);
             this.maingroup.Controls.Add(this.songovrLabel);
@@ -107,6 +115,30 @@ namespace osu_mp3
             this.maingroup.TabStop = false;
             this.maingroup.Text = "osu!MP3";
             this.maingroup.UseCompatibleTextRendering = true;
+            // 
+            // songnumber
+            // 
+            this.songnumber.AutoSize = true;
+            this.songnumber.Font = new System.Drawing.Font("Century Gothic", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.songnumber.Location = new System.Drawing.Point(28, 97);
+            this.songnumber.Name = "songnumber";
+            this.songnumber.Size = new System.Drawing.Size(0, 13);
+            this.songnumber.TabIndex = 15;
+            // 
+            // clear
+            // 
+            this.clear.AutoSize = true;
+            this.clear.BackColor = System.Drawing.Color.Transparent;
+            this.clear.Font = new System.Drawing.Font("Century Gothic", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.clear.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.clear.Location = new System.Drawing.Point(206, 210);
+            this.clear.Name = "clear";
+            this.clear.Size = new System.Drawing.Size(36, 15);
+            this.clear.TabIndex = 14;
+            this.clear.Text = "Clear";
+            this.clear.Click += new System.EventHandler(this.clear_Click);
+            this.clear.MouseEnter += new System.EventHandler(this.clear_MouseEnter);
+            this.clear.MouseLeave += new System.EventHandler(this.clear_MouseLeave);
             // 
             // songovrBrowseDir
             // 
@@ -135,7 +167,7 @@ namespace osu_mp3
             this.checkBox1.Size = new System.Drawing.Size(63, 17);
             this.checkBox1.TabIndex = 12;
             this.checkBox1.Text = "override";
-            this.songovrTT.SetToolTip(this.checkBox1, "If you don\'t have your \\Songs folder inside your osu! root folder, \ntick this box" +
+            this.tooltip.SetToolTip(this.checkBox1, "If you don\'t have your \\Songs folder inside your osu! root folder, \ntick this box" +
         " to browse your \\Songs folder");
             this.checkBox1.UseVisualStyleBackColor = true;
             this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
@@ -161,6 +193,7 @@ namespace osu_mp3
             this.songovrTextBox.Name = "songovrTextBox";
             this.songovrTextBox.Size = new System.Drawing.Size(224, 20);
             this.songovrTextBox.TabIndex = 10;
+            this.songovrTextBox.TextChanged += new System.EventHandler(this.songovrTextBox_TextChanged);
             // 
             // createdby
             // 
@@ -168,11 +201,13 @@ namespace osu_mp3
             this.createdby.BackColor = System.Drawing.Color.Transparent;
             this.createdby.Font = new System.Drawing.Font("Calibri", 6F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.createdby.ForeColor = System.Drawing.Color.WhiteSmoke;
-            this.createdby.Location = new System.Drawing.Point(166, 234);
+            this.createdby.Location = new System.Drawing.Point(159, 234);
             this.createdby.Name = "createdby";
+            this.createdby.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.createdby.Size = new System.Drawing.Size(156, 10);
             this.createdby.TabIndex = 2;
-            this.createdby.Text = "osu!MP3 1.1.12.1 (2021) created by Verchiel_";
+            this.createdby.Text = "osu!MP3 1.2.28.1 (2021) created by Verchiel_";
+            this.createdby.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // status
             // 
@@ -192,7 +227,7 @@ namespace osu_mp3
             this.openFolder.BackColor = System.Drawing.Color.Transparent;
             this.openFolder.Font = new System.Drawing.Font("Century Gothic", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.openFolder.ForeColor = System.Drawing.Color.WhiteSmoke;
-            this.openFolder.Location = new System.Drawing.Point(67, 216);
+            this.openFolder.Location = new System.Drawing.Point(67, 210);
             this.openFolder.Name = "openFolder";
             this.openFolder.Size = new System.Drawing.Size(46, 15);
             this.openFolder.TabIndex = 8;
@@ -307,15 +342,20 @@ namespace osu_mp3
             // extraction
             // 
             this.extraction.WorkerReportsProgress = true;
+            this.extraction.WorkerSupportsCancellation = true;
             // 
-            // songovrTT
+            // tooltip
             // 
-            this.songovrTT.Active = false;
-            this.songovrTT.AutomaticDelay = 100;
-            this.songovrTT.AutoPopDelay = 5000;
-            this.songovrTT.InitialDelay = 100;
-            this.songovrTT.ReshowDelay = 20;
-            this.songovrTT.ToolTipTitle = "Override";
+            this.tooltip.Active = false;
+            this.tooltip.AutomaticDelay = 100;
+            this.tooltip.AutoPopDelay = 5000;
+            this.tooltip.InitialDelay = 100;
+            this.tooltip.ReshowDelay = 20;
+            // 
+            // tagger
+            // 
+            this.tagger.WorkerReportsProgress = true;
+            this.tagger.WorkerSupportsCancellation = true;
             // 
             // mainform
             // 
@@ -329,7 +369,6 @@ namespace osu_mp3
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
-            this.MinimizeBox = false;
             this.Name = "mainform";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "osu!MP3";
@@ -361,7 +400,10 @@ namespace osu_mp3
         private System.Windows.Forms.TextBox songovrTextBox;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.Button songovrBrowseDir;
-        private System.Windows.Forms.ToolTip songovrTT;
+        private System.Windows.Forms.ToolTip tooltip;
+        private System.Windows.Forms.Label clear;
+        private System.Windows.Forms.Label songnumber;
+        private System.ComponentModel.BackgroundWorker tagger;
     }
 }
 
