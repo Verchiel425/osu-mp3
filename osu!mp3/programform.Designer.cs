@@ -54,11 +54,10 @@
             this.dstTextBox = new System.Windows.Forms.TextBox();
             this.srcTextBox = new System.Windows.Forms.TextBox();
             this.browseSrcDir = new System.Windows.Forms.Button();
+            this.selectsongsButton = new System.Windows.Forms.Button();
             this.extraction = new System.ComponentModel.BackgroundWorker();
             this.tooltip = new System.Windows.Forms.ToolTip(this.components);
             this.tagger = new System.ComponentModel.BackgroundWorker();
-            this.extractonly = new System.ComponentModel.BackgroundWorker();
-            this.tagonly = new System.ComponentModel.BackgroundWorker();
             this.maingroup.SuspendLayout();
             this.startmenustrip.SuspendLayout();
             this.SuspendLayout();
@@ -86,9 +85,8 @@
             // 
             // maingroup
             // 
-            this.maingroup.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.maingroup.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.maingroup.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(60)))), ((int)(((byte)(66)))), ((int)(((byte)(77)))));
             this.maingroup.Controls.Add(this.extractButton);
             this.maingroup.Controls.Add(this.startbutton);
@@ -109,6 +107,7 @@
             this.maingroup.Controls.Add(this.dstTextBox);
             this.maingroup.Controls.Add(this.srcTextBox);
             this.maingroup.Controls.Add(this.browseSrcDir);
+            this.maingroup.Controls.Add(this.selectsongsButton);
             this.maingroup.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.maingroup.ForeColor = System.Drawing.Color.WhiteSmoke;
             this.maingroup.Location = new System.Drawing.Point(12, 12);
@@ -260,12 +259,12 @@
             this.createdby.BackColor = System.Drawing.Color.Transparent;
             this.createdby.Font = new System.Drawing.Font("Calibri", 6F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.createdby.ForeColor = System.Drawing.Color.WhiteSmoke;
-            this.createdby.Location = new System.Drawing.Point(159, 234);
+            this.createdby.Location = new System.Drawing.Point(166, 234);
             this.createdby.Name = "createdby";
             this.createdby.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.createdby.Size = new System.Drawing.Size(156, 10);
+            this.createdby.Size = new System.Drawing.Size(152, 10);
             this.createdby.TabIndex = 2;
-            this.createdby.Text = "osu!MP3 1.4.34.1 (2021) created by Verchiel_";
+            this.createdby.Text = "osu!MP3 1.5.3.1 (2021) created by Verchiel_";
             this.createdby.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // status
@@ -291,6 +290,7 @@
             this.openFolder.Size = new System.Drawing.Size(46, 15);
             this.openFolder.TabIndex = 8;
             this.openFolder.Text = "Open...";
+            this.tooltip.SetToolTip(this.openFolder, "Opens Output Folder");
             this.openFolder.Click += new System.EventHandler(this.openFolder_Click);
             this.openFolder.MouseEnter += new System.EventHandler(this.label1_MouseEnter);
             this.openFolder.MouseLeave += new System.EventHandler(this.label1_MouseLeave);
@@ -303,10 +303,10 @@
             this.processI.BackColor = System.Drawing.Color.Transparent;
             this.processI.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.processI.ForeColor = System.Drawing.Color.White;
-            this.processI.Location = new System.Drawing.Point(7, 155);
+            this.processI.Location = new System.Drawing.Point(0, 155);
             this.processI.Name = "processI";
             this.processI.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.processI.Size = new System.Drawing.Size(304, 17);
+            this.processI.Size = new System.Drawing.Size(318, 17);
             this.processI.TabIndex = 7;
             this.processI.Text = "Click Extract/Tag to start";
             this.processI.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -330,9 +330,9 @@
             this.dstLabel.ForeColor = System.Drawing.Color.White;
             this.dstLabel.Location = new System.Drawing.Point(6, 113);
             this.dstLabel.Name = "dstLabel";
-            this.dstLabel.Size = new System.Drawing.Size(96, 15);
+            this.dstLabel.Size = new System.Drawing.Size(79, 15);
             this.dstLabel.TabIndex = 5;
-            this.dstLabel.Text = "Extraction Folder";
+            this.dstLabel.Text = "Output Folder";
             // 
             // srcLabel
             // 
@@ -399,6 +399,25 @@
             this.browseSrcDir.Text = "Browse...";
             this.browseSrcDir.UseVisualStyleBackColor = false;
             this.browseSrcDir.Click += new System.EventHandler(this.browseSrcDir_Click);
+            // 
+            // selectsongsButton
+            // 
+            this.selectsongsButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.selectsongsButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(57)))), ((int)(((byte)(69)))));
+            this.selectsongsButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.selectsongsButton.Cursor = System.Windows.Forms.Cursors.Default;
+            this.selectsongsButton.Enabled = false;
+            this.selectsongsButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.selectsongsButton.Font = new System.Drawing.Font("Century Gothic", 6F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.selectsongsButton.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.selectsongsButton.Location = new System.Drawing.Point(236, 95);
+            this.selectsongsButton.Name = "selectsongsButton";
+            this.selectsongsButton.Size = new System.Drawing.Size(73, 22);
+            this.selectsongsButton.TabIndex = 17;
+            this.selectsongsButton.TabStop = false;
+            this.selectsongsButton.Text = "Select Songs";
+            this.selectsongsButton.UseVisualStyleBackColor = false;
+            this.selectsongsButton.Click += new System.EventHandler(this.selectsongsButton_Click);
             // 
             // extraction
             // 
@@ -471,8 +490,7 @@
         private System.Windows.Forms.ToolStripMenuItem extractandtagToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem extractOnlyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem tagOnlyToolStripMenuItem;
-        private System.ComponentModel.BackgroundWorker extractonly;
-        private System.ComponentModel.BackgroundWorker tagonly;
+        private System.Windows.Forms.Button selectsongsButton;
     }
 }
 

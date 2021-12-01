@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using ezf;
+using System;
 using System.IO;
-using ezf;
 using System.Text.Json;
+using System.Windows.Forms;
 
 namespace osu_mp3
 {
@@ -62,7 +59,7 @@ namespace osu_mp3
             {
                 return -1;
             }
-            
+
             FOLDER source = new FOLDER(songdir);
             FOLDER dest = new FOLDER(destdir);
             FOLDER songfolder = new FOLDER();
@@ -70,7 +67,8 @@ namespace osu_mp3
             try
             {
                 songfolder.setPath(source.getfolders()[index]);
-            }catch(System.IndexOutOfRangeException)
+            }
+            catch (System.IndexOutOfRangeException)
             {
                 return -2;
             }
@@ -88,7 +86,7 @@ namespace osu_mp3
                     currently_extracting = remove_id(NAME.isolate(songfolder.getpath()));
                 }
             }
-            if(songfolder.totalfiles() == 0)
+            if (songfolder.totalfiles() == 0)
             {
                 return -1;
             }
@@ -102,7 +100,7 @@ namespace osu_mp3
 
             for (int index = 0; index < folder.totalfolders(); index++)
             {
-                if ((folder.getfolders()[index]).Contains(songname))
+                if (((folder.getfolders()[index]).ToUpper()).Contains(songname.ToUpper()))
                 {
                     songfolder.setPath(folder.getfolders()[index]);
                 }
@@ -127,21 +125,44 @@ namespace osu_mp3
         public static string remove_id(string str)
         {
             int s = 0;
-            for(int i = 0; i < str.Length; i++)
+            for (int i = 0; i < str.Length; i++)
             {
-                if(char.IsWhiteSpace(str[i]))
+                if (char.IsWhiteSpace(str[i]))
                 {
                     s = i;
                     break;
                 }
             }
-            if(s == 0)
+            if (s == 0)
             {
                 return str.Substring(s, (str.Length));
             }
-            return str.Substring(s + 1, (str.Length - 1)-s);
+            return str.Substring(s + 1, (str.Length - 1) - s);
+        }
+        public static string only_id(string str)
+        {
+            int s = 0;
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (char.IsWhiteSpace(str[i]))
+                {
+                    s = i;
+                    break;
+                }
+            }
+            if (s == 0)
+            {
+                return str.Substring(s, (str.Length));
+            }
+            return str.Substring(0, s);
         }
     };
+    public class LOG
+    {
+        public string time { get; set; }
+        public int items { get; set; }
+        public string operation { get; set; }
+    }
     public class CONFIG
     {
         public string osudir { get; set; }
@@ -279,4 +300,36 @@ namespace osu_mp3
             }
         }
     };
+    class log
+    {
+        public static void save(string TIME, int ITEMS, int OPERATION)
+        {
+            string TEMP = "ExtractAndTag";
+            switch (OPERATION)
+            {
+                case 0:
+                    TEMP = "ExtractAndTag";
+                    break;
+                case 1:
+                    TEMP = "ExtractOnly";
+                    break;
+                case 2:
+                    TEMP = "TagOnly";
+                    break;
+                default:
+                    break;
+            }
+            LOG log = new LOG
+            {
+                time = TIME,
+                items = ITEMS,
+                operation = TEMP
+            };
+
+            string logname = "log.json";
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string logjson = JsonSerializer.Serialize(log, options);
+            File.AppendAllText(logname, logjson);
+        }
+    }
 }

@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using ezf;
 using Ookii.Dialogs.Wpf;
-using System.Runtime.InteropServices;
-using System.IO;
+using System;
+using System.ComponentModel;
 using System.Diagnostics;
-using System.Threading;
-using ezf;
-using mp3ID3parser;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Windows.Forms;
+using tagger;
 
 namespace osu_mp3
 {
@@ -31,16 +25,9 @@ namespace osu_mp3
             tagger.ProgressChanged += Tagger_ProgressChanged;
             tagger.WorkerReportsProgress = true;
             tagger.RunWorkerCompleted += Tagger_RunWorkerCompleted;
-            extractonly.DoWork += Extractonly_DoWork;
-            extractonly.ProgressChanged += Extractonly_ProgressChanged;
-            extractonly.WorkerReportsProgress = true;
-            extractonly.RunWorkerCompleted += Extractonly_RunWorkerCompleted;
-            tagonly.DoWork += Tagonly_DoWork;
-            tagonly.ProgressChanged += Tagonly_ProgressChanged;
-            tagonly.WorkerReportsProgress = true;
-            tagonly.RunWorkerCompleted += Tagonly_RunWorkerCompleted;
+            DidSelectSongs = false;
         }
-        public static int startbuttonstate = 0;
+        
         public class MenuButton : Button
         {
             [DefaultValue(null)]
@@ -107,110 +94,22 @@ namespace osu_mp3
                 Application.DoEvents();
             }
         }
+
+
+
+        public static bool DidSelectSongs { get; set; }
         string currently_tagging;
         Stopwatch stopwatch = new Stopwatch();
         static int d;
         static int c;
+        static int tagger_completed;
+        static int extraction_completed;
+        public static int operation = 0;
+        public static string SONGSFOLDER;
+        public static bool controlsLocked = false;
 
-        #region TagOnly
-        private void Tagonly_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            progressBar1.Value = 100;
-            stopwatch.Stop();
 
-            TimeSpan ts = stopwatch.Elapsed;
-            string timeElapsed = String.Format("{0:00}.{1:00}", ts.TotalSeconds, ts.Milliseconds / 10);
 
-            this.processI.Text = "All processes completed!";
-            this.status.Text = "Completed! (Time: " + timeElapsed + " s)";
-            this.extractButton.Enabled = true;
-            this.startbutton.Enabled = true;
-        }
-
-        private void Tagonly_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            int completed = e.ProgressPercentage;
-            int total = FOLDER.totalfiles(this.dstTextBox.Text);
-            int progress = (int)(((float)completed / (float)total) * 100);
-            progressBar1.Value = progress;
-            this.processI.Text = String.Format("({0}/{1}) {2}% completed...", completed, total, progress);
-            string currentlytagging = " " + currently_tagging;
-            this.status.Text = "Tagging" + currentlytagging + "...";
-        }
-
-        private void Tagonly_DoWork(object sender, DoWorkEventArgs e)
-        {
-            FOLDER destfolder = new FOLDER(this.dstTextBox.Text);
-            int total = destfolder.totalfiles();
-            int p = 0;
-            for (int i = 0; i < total; i++)
-            {
-                if ((destfolder.getfiles()[i]).Contains(".mp3"))
-                {
-                    wait(25);
-                    currently_tagging = NAME.isolate(destfolder.getfiles()[i]);
-                    ID3.setTags(destfolder.getfiles()[i]);
-                    ID3.setCover(destfolder.getfiles()[i], osu.getPic(this.songovrTextBox.Text, modify.isolate_title(destfolder.getfiles()[i])));
-                    p++;
-                    tagonly.ReportProgress(p);
-                }
-            }
-        }
-        #endregion TagOnly
-        #region ExtractOnly
-        private void Extractonly_DoWork(object sender, DoWorkEventArgs e)
-        {
-            d = 0;
-            c = 0;
-
-            int total = FOLDER.totalfolders(this.songovrTextBox.Text);
-
-            for (int i = 0; i < total; i++)
-            {
-                wait(25);
-                switch (osu.extract(this.songovrTextBox.Text, this.dstTextBox.Text, i))
-                {
-                    case 0:
-                        c++;
-                        break;
-                    case 1:
-                        d++;
-                        break;
-                    default:
-                        osu.isSuccess = false;
-                        break;
-                }
-
-                extractonly.ReportProgress(i);
-            }
-        }
-
-        private void Extractonly_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            int completed = e.ProgressPercentage;
-            int total = FOLDER.totalfolders(this.songovrTextBox.Text);
-            int progress = (int)(((float)completed / (float)total) * 100);
-            progressBar1.Value = progress;
-            this.processI.Text = String.Format("({0}/{1}) {2}% completed...", completed, total, progress);
-            string currentlyextracting = " " + osu.currentlyextracting();
-            this.status.Text = "Extracting" + currentlyextracting + "...";
-        }
-
-        private void Extractonly_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            progressBar1.Value = 100;
-            stopwatch.Stop();
-
-            TimeSpan ts = stopwatch.Elapsed;
-            string timeElapsed = String.Format("{0:00}.{1:00}", ts.TotalSeconds, ts.Milliseconds / 10);
-
-            this.processI.Text = "All processes completed!";
-            this.status.Text = "Completed! (Time: " + timeElapsed + " s)";
-            this.extractButton.Enabled = true;
-            this.startbutton.Enabled = true;
-        }
-        #endregion
-        #region ExtractAndTag
         private void Tagger_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             progressBar1.Value = 100;
@@ -221,17 +120,25 @@ namespace osu_mp3
 
             this.processI.Text = "All processes completed!";
             this.status.Text = "Completed! (Time: " + timeElapsed + " s)";
-            this.extractButton.Enabled = true;
-            this.startbutton.Enabled = true;
+            log.save(timeElapsed, tagger_completed, operation);
+            unlockControls();
         }
 
         private void Tagger_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            int completed = e.ProgressPercentage;
-            int total = FOLDER.totalfiles(this.dstTextBox.Text);
-            int progress = (int)(((float)completed / (float)total) * 100);
+            tagger_completed = e.ProgressPercentage;
+            int total;
+            if (DidSelectSongs)
+            {
+                total = SongSelection.acceptItems.Count(s => s != null) - d;
+            }
+            else
+            {
+                total = FOLDER.totalfiles(this.dstTextBox.Text);
+            }
+            int progress = (int)(((float)tagger_completed / (float)total) * 100);
             progressBar1.Value = progress;
-            this.processI.Text = String.Format("({0}/{1}) {2}% completed...", completed, total, progress);
+            this.processI.Text = String.Format("({0}/{1}) {2}% completed...", tagger_completed, total, progress);
             string currentlytagging = " " + currently_tagging;
             this.status.Text = "Tagging" + currentlytagging + "...";
         }
@@ -239,15 +146,42 @@ namespace osu_mp3
         private void Tagger_DoWork(object sender, DoWorkEventArgs e)
         {
             FOLDER destfolder = new FOLDER(this.dstTextBox.Text);
+            string songfolder = this.songovrTextBox.Text;
             int total = destfolder.totalfiles();
             int p = 0;
-            for (int i = 0; i < total; i++){
+            
+            if (DidSelectSongs)
+            {
+                int selected_total = SongSelection.acceptItems.Count(s => s != null) - d;
+                for (int i = 0; i < total; i++)
+                {
+                    for (int L = 0; L < selected_total; L++)
+                    {
+                        string selected_song = SongSelection.acceptItems[L];
+                        if (destfolder.getfiles()[i].Contains(osu.remove_id(selected_song)))
+                        {
+                            if ((destfolder.getfiles()[i]).Contains(".mp3"))
+                            {
+                                wait(25);
+                                currently_tagging = isolate.fullname(destfolder.getfiles()[i]);
+                                METADATA.TagSongs(destfolder, i);
+                                METADATA.SetCover(destfolder, i, osu.getPic(songfolder, currently_tagging));
+                                p++;
+                                tagger.ReportProgress(p);
+                            }
+                        }
+                    }
+                }
+                return;
+            }
+            for (int i = 0; i < total; i++)
+            {
                 if ((destfolder.getfiles()[i]).Contains(".mp3"))
                 {
                     wait(25);
-                    currently_tagging = NAME.isolate(destfolder.getfiles()[i]);
-                    ID3.setTags(destfolder.getfiles()[i]);
-                    ID3.setCover(destfolder.getfiles()[i], osu.getPic(this.songovrTextBox.Text, modify.isolate_title(destfolder.getfiles()[i])));
+                    currently_tagging = isolate.fullname(destfolder.getfiles()[i]);
+                    METADATA.TagSongs(destfolder, i);
+                    METADATA.SetCover(destfolder, i, osu.getPic(songfolder, currently_tagging));
                     p++;
                     tagger.ReportProgress(p);
                 }
@@ -259,35 +193,65 @@ namespace osu_mp3
 
             if (osu.isSuccess)
             {
-                string m = "Extracted " + c + " songs (" + d +" copies)";
+                string m = String.Format("Extract {0} song(s) ({1} copy(s))", c, d);
                 this.processI.Text = m;
                 this.status.Text = "Extraction complete!";
-                progressBar1.Value = 100;
-                wait(500);
-                this.status.Text = "Proceeding to set tags...";
-                wait(1000);
-                this.status.Text = String.Format("{0} files to be tagged...", FOLDER.totalfiles(this.dstTextBox.Text));
                 wait(500);
             }
             else
             {
                 string m = "No songs found...";
                 this.processI.Text = m;
-                progressBar1.Value = 100;
+                wait(500);
             }
+            progressBar1.Value = 100;
             GC.Collect();
             GC.WaitForPendingFinalizers();
-            progressBar1.Value = 0;
-            tagger.RunWorkerAsync();
+            if (operation == 0)
+            {
+                progressBar1.Value = 0;
+                this.status.Text = "Proceeding to set tags...";
+                wait(1000);
+                if (DidSelectSongs)
+                {
+                    this.status.Text = String.Format("{0} file(s) to be tagged...", SongSelection.acceptItems.Count(s => s != null) - d);
+                }
+                else
+                {
+                    this.status.Text = String.Format("{0} file(s) to be tagged...", c);
+                }
+                wait(500);
+                tagger.RunWorkerAsync();
+            }
+            else
+            {
+                stopwatch.Stop();
+
+                TimeSpan ts = stopwatch.Elapsed;
+                string timeElapsed = String.Format("{0:00}.{1:00}", ts.TotalSeconds, ts.Milliseconds / 10);
+
+                this.processI.Text = "All processes completed!";
+                this.status.Text = "Completed! (Time: " + timeElapsed + " s)";
+                log.save(timeElapsed, extraction_completed, operation);
+                unlockControls();
+            }
         }
 
         private void Extraction_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            int completed = e.ProgressPercentage;
-            int total = FOLDER.totalfolders(this.songovrTextBox.Text);
-            int progress = (int)(((float)completed / (float)total) * 100);
+            extraction_completed = e.ProgressPercentage;
+            int total;
+            if (DidSelectSongs)
+            {
+                total = SongSelection.acceptItems.Count(s => s != null);
+            }
+            else
+            {
+                total = FOLDER.totalfolders(this.songovrTextBox.Text);
+            }
+            int progress = (int)(((float)extraction_completed / (float)total) * 100);
             progressBar1.Value = progress;
-            this.processI.Text = String.Format("({0}/{1}) {2}% completed...", completed, total, progress);
+            this.processI.Text = String.Format("({0}/{1}) {2}% completed...", extraction_completed, total, progress);
             string currentlyextracting = " " + osu.currentlyextracting();
             this.status.Text = "Extracting" + currentlyextracting + "...";
         }
@@ -297,12 +261,64 @@ namespace osu_mp3
             d = 0;
             c = 0;
 
-            int total = FOLDER.totalfolders(this.songovrTextBox.Text);
+            string songfolder = this.songovrTextBox.Text;
+            string destfolder = this.dstTextBox.Text;
+            FOLDER SONG_FOLDER = new FOLDER(songfolder);
+            int total = SONG_FOLDER.totalfolders();
+            if (DidSelectSongs)
+            {
+                if (SongSelection.acceptItems.Count(s => s != null) == total)
+                {
+                    for (int i = 0; i < total; i++)
+                    {
+                        wait(25);
+                        switch (osu.extract(songfolder, destfolder, i))
+                        {
+                            case 0:
+                                c++;
+                                break;
+                            case 1:
+                                d++;
+                                break;
+                            default:
+                                osu.isSuccess = false;
+                                break;
+                        }
+
+                        extraction.ReportProgress(i);
+                    }
+                    return;
+                }
+                for (int i = 0; i < total; i++)
+                {
+                    for (int L = 0; L < SongSelection.acceptItems.Count(s => s != null); L++)
+                    {
+                        string selected_song = SongSelection.acceptItems[L];
+                        if (SONG_FOLDER.getfolders()[i].Contains(selected_song))
+                        {
+                            switch (osu.extract(songfolder, destfolder, i))
+                            {
+                                case 0:
+                                    c++;
+                                    break;
+                                case 1:
+                                    d++;
+                                    break;
+                                default:
+                                    osu.isSuccess = false;
+                                    break;
+                            }
+                            extraction.ReportProgress(c);
+                        }
+                    }
+                }
+                return;
+            }
 
             for (int i = 0; i < total; i++)
             {
                 wait(25);
-                switch (osu.extract(this.songovrTextBox.Text, this.dstTextBox.Text, i))
+                switch (osu.extract(songfolder, destfolder, i))
                 {
                     case 0:
                         c++;
@@ -318,12 +334,13 @@ namespace osu_mp3
                 extraction.ReportProgress(i);
             }
         }
-        #endregion ExtractAndTag
 
         private void extractbutton(object sender, EventArgs e)
         {
             osu.isSuccess = true;
-            switch (startbuttonstate)
+            extraction_completed = 0;
+            tagger_completed = 0;
+            switch (operation)
             {
                 case 0://extractandtag
                     if (this.songovrTextBox.Text != "" && this.dstTextBox.Text != "")
@@ -334,13 +351,12 @@ namespace osu_mp3
                         this.processI.Text = "Initializing...";
                         wait(500);
 
-                        config.save(this.srcTextBox.Text, this.songovrTextBox.Text, this.dstTextBox.Text, checkBox1.Checked, startbuttonstate);
+                        config.save(this.srcTextBox.Text, this.songovrTextBox.Text, this.dstTextBox.Text, checkBox1.Checked, operation);
 
                         osu.setDstDir(this.dstTextBox.Text);
                         this.processI.Text = "Checking directory...";
                         wait(500);
-                        this.extractButton.Enabled = false;
-                        this.startbutton.Enabled = false;
+                        lockControls();
                         this.progressBar1.Enabled = true;
 
                         if (!extraction.IsBusy)
@@ -367,19 +383,18 @@ namespace osu_mp3
                         this.processI.Text = "Initializing...";
                         wait(500);
 
-                        config.save(this.srcTextBox.Text, this.songovrTextBox.Text, this.dstTextBox.Text, checkBox1.Checked, startbuttonstate);
+                        config.save(this.srcTextBox.Text, this.songovrTextBox.Text, this.dstTextBox.Text, checkBox1.Checked, operation);
 
                         osu.setDstDir(this.dstTextBox.Text);
                         this.processI.Text = "Checking directory...";
                         wait(500);
-                        this.extractButton.Enabled = false;
-                        this.startbutton.Enabled = false;
+                        lockControls();
                         this.progressBar1.Enabled = true;
 
                         if (!extraction.IsBusy)
                         {
                             this.processI.Text = "Proceeding to extraction...";
-                            extractonly.RunWorkerAsync();
+                            extraction.RunWorkerAsync();
                         }
                         else
                         {
@@ -394,25 +409,26 @@ namespace osu_mp3
                 case 2://tagonly
                     if (this.songovrTextBox.Text != "" && this.dstTextBox.Text != "")
                     {
+                        d = 0;
+                        c = 0;
                         this.status.Text = "Tagging...";
                         stopwatch.Reset();
                         stopwatch.Start();
                         this.processI.Text = "Initializing...";
                         wait(500);
 
-                        config.save(this.srcTextBox.Text, this.songovrTextBox.Text, this.dstTextBox.Text, checkBox1.Checked, startbuttonstate);
+                        config.save(this.srcTextBox.Text, this.songovrTextBox.Text, this.dstTextBox.Text, checkBox1.Checked, operation);
 
                         osu.setDstDir(this.dstTextBox.Text);
                         this.processI.Text = "Checking directory...";
                         wait(500);
-                        this.extractButton.Enabled = false;
-                        this.startbutton.Enabled = false;
+                        lockControls();
                         this.progressBar1.Enabled = true;
 
                         if (!extraction.IsBusy)
                         {
                             this.processI.Text = "Proceeding to tag...";
-                            tagonly.RunWorkerAsync();
+                            tagger.RunWorkerAsync();
                         }
                         else
                         {
@@ -427,13 +443,14 @@ namespace osu_mp3
                 default:
                     break;
             }
-            
+
         }
 
         private void browseSrcDir_Click(object sender, EventArgs e)
         {
-            
+
             OpenFileDialog srcOFD = new OpenFileDialog();
+            srcOFD.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             srcOFD.Filter = "osu! Executable File |osu!.exe";
             srcOFD.Title = "Open osu! Executable File";
             if (srcOFD.ShowDialog() == DialogResult.OK)
@@ -446,7 +463,7 @@ namespace osu_mp3
         private void browseDstDir_Click(object sender, EventArgs e)
         {
             Ookii.Dialogs.Wpf.VistaFolderBrowserDialog ddb = new VistaFolderBrowserDialog();
-            if(ddb.ShowDialog() == true)
+            if (ddb.ShowDialog() == true)
             {
                 this.dstTextBox.Text = ddb.SelectedPath;
             }
@@ -457,7 +474,7 @@ namespace osu_mp3
             this.srcTextBox.Text = config.osudir();
             this.dstTextBox.Text = config.destdir();
             this.songovrTextBox.Text = config.songdir();
-            if(config.overridestate() == "True")
+            if (config.overridestate() == "True")
             {
                 this.checkBox1.Checked = true;
             }
@@ -471,7 +488,7 @@ namespace osu_mp3
                     extractOnlyToolStripMenuItem.Checked = false;
                     tagOnlyToolStripMenuItem.Checked = false;
                     extractandtagToolStripMenuItem.Checked = true;
-                    startbuttonstate = 0;
+                    operation = 0;
                     this.extractButton.Text = "Extract/Tag";
                     this.processI.Text = "Click " + this.extractButton.Text + " to start";
                     break;
@@ -479,7 +496,7 @@ namespace osu_mp3
                     extractOnlyToolStripMenuItem.Checked = true;
                     tagOnlyToolStripMenuItem.Checked = false;
                     extractandtagToolStripMenuItem.Checked = false;
-                    startbuttonstate = 1;
+                    operation = 1;
                     this.extractButton.Text = "Extract Only";
                     this.processI.Text = "Click " + this.extractButton.Text + " to start";
                     break;
@@ -487,7 +504,7 @@ namespace osu_mp3
                     extractOnlyToolStripMenuItem.Checked = false;
                     tagOnlyToolStripMenuItem.Checked = true;
                     extractandtagToolStripMenuItem.Checked = false;
-                    startbuttonstate = 2;
+                    operation = 2;
                     this.extractButton.Text = "Tag Only";
                     this.processI.Text = "Click " + this.extractButton.Text + " to start";
                     break;
@@ -499,6 +516,7 @@ namespace osu_mp3
         private void label1_MouseEnter(object sender, EventArgs e)
         {
             this.openFolder.Font = new System.Drawing.Font("Century Gothic", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tooltip.Active = true;
         }
         private void label1_MouseLeave(object sender, EventArgs e)
         {
@@ -536,14 +554,19 @@ namespace osu_mp3
             if (checkBox1.Checked)
             {
                 this.browseSrcDir.Enabled = false;
-                
-                this.songovrBrowseDir.Enabled = true;
+                if (!controlsLocked)
+                {
+                    this.songovrBrowseDir.Enabled = true;
+                }
                 this.srcTextBox.Text = "";
             }
             else
             {
-                this.browseSrcDir.Enabled = true;
-                
+                if (!controlsLocked)
+                {
+                    this.browseSrcDir.Enabled = true;
+                }
+
                 this.songovrBrowseDir.Enabled = false;
                 this.srcTextBox.Text = config.osudir();
             }
@@ -574,7 +597,7 @@ namespace osu_mp3
                 tagger.CancelAsync();
             }
             this.progressBar1.Value = 100;
-            config.save(this.srcTextBox.Text, this.songovrTextBox.Text, this.dstTextBox.Text, checkBox1.Checked, startbuttonstate);
+            config.save(this.srcTextBox.Text, this.songovrTextBox.Text, this.dstTextBox.Text, checkBox1.Checked, operation);
         }
 
         private void clear_MouseEnter(object sender, EventArgs e)
@@ -599,8 +622,15 @@ namespace osu_mp3
             if (string.IsNullOrEmpty(songovrTextBox.Text))
             {
                 this.songnumber.Text = "";
+                this.selectsongsButton.Enabled = false;
+                SONGSFOLDER = this.songovrTextBox.Text;
             }
-            this.songnumber.Text = (FOLDER.totalfolders(this.songovrTextBox.Text)).ToString() + " folders found...";
+            else
+            {
+                this.songnumber.Text = (FOLDER.totalfolders(this.songovrTextBox.Text)).ToString() + " folder(s) found...";
+                this.selectsongsButton.Enabled = true;
+                SONGSFOLDER = this.songovrTextBox.Text;
+            }
         }
 
         private void extractandtagToolStripMenuItem_Click(object sender, EventArgs e)
@@ -608,7 +638,7 @@ namespace osu_mp3
             extractOnlyToolStripMenuItem.Checked = false;
             tagOnlyToolStripMenuItem.Checked = false;
             extractandtagToolStripMenuItem.Checked = true;
-            startbuttonstate = 0;
+            operation = 0;
             this.extractButton.Text = "Extract/Tag";
             this.processI.Text = "Click " + this.extractButton.Text + " to start";
         }
@@ -618,7 +648,7 @@ namespace osu_mp3
             extractOnlyToolStripMenuItem.Checked = true;
             tagOnlyToolStripMenuItem.Checked = false;
             extractandtagToolStripMenuItem.Checked = false;
-            startbuttonstate = 1;
+            operation = 1;
             this.extractButton.Text = "Extract Only";
             this.processI.Text = "Click " + this.extractButton.Text + " to start";
         }
@@ -628,9 +658,41 @@ namespace osu_mp3
             extractOnlyToolStripMenuItem.Checked = false;
             tagOnlyToolStripMenuItem.Checked = true;
             extractandtagToolStripMenuItem.Checked = false;
-            startbuttonstate = 2;
+            operation = 2;
             this.extractButton.Text = "Tag Only";
             this.processI.Text = "Click " + this.extractButton.Text + " to start";
+        }
+
+        private void selectsongsButton_Click(object sender, EventArgs e)
+        {
+            SongSelection songselection = new SongSelection();
+            if (songselection.ShowDialog() == DialogResult.OK)
+            {
+                this.status.Text = String.Format("{0} song(s) selected!", SongSelection.acceptItems.Count(s => s != null));
+            }
+        }
+        public void lockControls()
+        {
+            this.extractButton.Enabled = false;
+            this.browseDstDir.Enabled = false;
+            this.browseSrcDir.Enabled = false;
+            this.songovrBrowseDir.Enabled = false;
+            this.selectsongsButton.Enabled = false;
+            this.startbutton.Enabled = false;
+            controlsLocked = true;
+        }
+        public void unlockControls()
+        {
+            this.extractButton.Enabled = true;
+            this.browseDstDir.Enabled = true;
+            if (checkBox1.Checked)
+            {
+                this.browseSrcDir.Enabled = false;
+                this.songovrBrowseDir.Enabled = true;
+            }
+            this.selectsongsButton.Enabled = true;
+            this.startbutton.Enabled = true;
+            controlsLocked = false;
         }
     }
 }

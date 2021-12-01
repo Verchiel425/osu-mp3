@@ -60,6 +60,7 @@ namespace ezf
             }
             else
             {
+
                 Directory.CreateDirectory(path);
                 PATH = Path.GetFullPath(path);
             }
@@ -89,7 +90,14 @@ namespace ezf
         }
         public int totalfiles()
         {
-            return Directory.GetFiles(PATH).Length;
+            try
+            {
+                return Directory.GetFiles(PATH).Length;
+            }
+            catch (System.ArgumentNullException)
+            {
+                return 0;
+            }
         }
         public static int totalfiles(string path)
         {
@@ -121,7 +129,7 @@ namespace ezf
         }
         public static void create(string name, FOLDER folder)
         {
-            string fullpath = folder.getpath() + "\\" +name;
+            string fullpath = folder.getpath() + "\\" + name;
             File.Create(fullpath);
         }
         public static int copy(FOLDER sourcefolder, string sourcefilename, FOLDER destfolder, string destfilename)
@@ -133,14 +141,20 @@ namespace ezf
             {
                 return 1;
             }
-            File.Copy(source, dest,true);
+            File.Copy(source, dest, true);
             return 0;
         }
-        public static void startprocess(FOLDER folder,string filename)
+        public static string remove_mp3(string FILENAME)
+        {
+            string newfilename = FILENAME.Substring(0, FILENAME.Length - 4);
+            return newfilename;
+        }
+        public static void startprocess(FOLDER folder, string filename)
         {
             string name = folder.getpath() + "\\" + filename;
-            if (File.Exists(name)) { 
-                Process.Start(name); 
+            if (File.Exists(name))
+            {
+                Process.Start(name);
             }
         }
     }

@@ -63,7 +63,8 @@
     <ManifestCertificateThumbprint>5AA16E4FE81415AAB50780E28D020ACCA612437E</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>osu!mp3_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>
+    </ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -73,6 +74,10 @@
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>osu_mp3.main</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />
@@ -97,7 +102,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="easyfiles.cs" />
-    <Compile Include="ID3.cs" />
+    <Compile Include="SongSelection.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SongSelection.Designer.cs">
+      <DependentUpon>SongSelection.cs</DependentUpon>
+    </Compile>
+    <Compile Include="tagger.cs" />
     <Compile Include="programform.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -114,6 +125,12 @@
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="SongSelection.resx">
+      <DependentUpon>SongSelection.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="..\.editorconfig">
+      <Link>.editorconfig</Link>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
