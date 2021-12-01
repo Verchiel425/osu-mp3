@@ -8,4 +8,5 @@ HOW TO USE:
  - this is where your .mp3 files will be extracted to
 3) Hit "Extract MP3"
 
-The program will automatically assign the names so you don't have to worry about having duplicate "audio.mp3" files
+Optional:
+You can select certain songs to extract/tag. By default, the program will extract/tag all songs.
